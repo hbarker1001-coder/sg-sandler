@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sandler Sales Training – Module</title>
+  <meta name="description" content="Reusable HTML template for audio-based Sandler training with reflection questions and a quiz." />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --brand-primary: #0a5cff; /* overwritten by config */
+      --brand-accent: #00c2a8;  /* overwritten by config */
+      --text: #111827;
+      --muted: #6b7280;
+      --bg: #f9fafb;
+      --card: #ffffff;
+      --ok: #059669;
+      --warn: #b45309;
+      --err: #dc2626;
+      --radius: 16px;
+      --shadow: 0 10px 24px rgba(0,0,0,.08), 0 4px 10px rgba(0,0,0,.04);
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color: var(--text); background: var(--bg); }
+    .container { max-width: 980px; margin: 32px auto; padding: 0 16px; }
+    header.card, section.card, .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; }
+    header.card { display: grid; grid-template-columns: 72px 1fr auto; gap: 16px; align-items: center; }
+    header .logo { width: 64px; height: 64px; border-radius: 12px; object-fit: contain; background:#fff; border:1px solid #eee; }
+    .brand { display:flex; flex-direction:column; gap:4px; }
+    .brand h1 { margin: 0; font-weight: 700; font-size: 1.4rem; }
+    .brand .subtitle { color: var(--muted); font-size: .95rem; }
+    .pill { padding: 6px 10px; border-radius: 999px; background: var(--brand-primary); color: #fff; font-weight: 600; }
+
+    .audio-wrap { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    .progress-outer { background: #eef2ff; border-radius: 999px; height: 12px; }
+    .progress-inner { background: var(--brand-primary); height: 12px; border-radius: 999px; width: 0%; transition: width .3s ease; }
+
+    h2 { margin: 20px 0 10px; font-size: 1.25rem; }
+    .q { margin: 14px 0; }
+    .q label { display:block; font-weight: 600; margin-bottom: 6px; }
+    .q textarea { width: 100%; min-height: 96px; padding: 12px; border-radius: 12px; border: 1px solid #e5e7eb; resize: vertical; font: inherit; }
+
+    .mcq { margin: 16px 0; padding: 16px; border:1px solid #eef; border-radius: 12px; }
+    .mcq h3 { margin: 0 0 8px; font-size: 1.05rem; }
+    .choices { display: grid; gap: 8px; }
+    .choice { display:flex; gap:10px; align-items:flex-start; padding: 10px 12px; border:1px solid #e5e7eb; border-radius: 12px; cursor: pointer; background:#fff; }
+    .choice input { margin-top: 4px; }
+
+    .btns { display:flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+    button { appearance:none; border:none; padding: 12px 16px; border-radius: 12px; font-weight: 600; cursor: pointer; }
+    .btn-primary { background: var(--brand-primary); color:#fff; }
+    .btn-ghost { background: #eef2f7; color:#111; }
+    .btn-danger { background: var(--err); color:#fff; }
+
+    .notice { padding: 12px 14px; border-radius: 12px; background: #f3f4f6; color: #111; border:1px dashed #e5e7eb; }
+
+    .score { font-size: 1.4rem; font-weight: 700; }
+    .chip { display:inline-block; padding: 6px 10px; border-radius: 999px; font-weight: 700; }
+    .chip.ok { background: rgba(5,150,105,.12); color: var(--ok); }
+    .chip.fail { background: rgba(220,38,38,.12); color: var(--err); }
+
+    footer { text-align:center; color: var(--muted); margin: 24px 0; font-size:.9rem; }
+    a { color: var(--brand-primary); text-decoration: none; }
+
+    .explain { font-size: .95rem; color: #374151; margin-top: 6px; }
+
+    @media (max-width: 720px){ header.card{ grid-template-columns: 56px 1fr; } header .pill{ grid-column: 1 / -1; justify-self: start; } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="card" id="header">
+      <img class="logo" id="logo" alt="Company logo" />
+      <div class="brand">
+        <h1 id="courseTitle">Sandler Sales Training</h1>
+        <div class="subtitle" id="subtitle">Reusable module template</div>
+      </div>
+      <div class="pill" id="modulePill">Module</div>
+    </header>
+
+    <section class="card" id="audioCard" aria-labelledby="audioTitle">
+      <h2 id="audioTitle">1. Listen to the lesson</h2>
+      <div class="audio-wrap">
+        <audio id="lessonAudio" controls preload="metadata" style="width:100%">
+          <source id="audioSrc" src="" type="audio/mpeg">
+          Your browser does not support audio.
+        </audio>
+        <div class="progress-outer" aria-hidden="true">
+          <div class="progress-inner" id="audioProgress"></div>
+        </div>
+        <div class="notice" id="audioNote">Tip: answers auto save. You can pause, take notes, then continue.</div>
+      </div>
+    </section>
+
+    <section class="card" id="reflectCard" aria-labelledby="reflectTitle">
+      <h2 id="reflectTitle">2. Reflection questions</h2>
+      <form id="reflectForm"></form>
+      <div class="btns">
+        <button class="btn-primary" id="saveReflections" type="button">Save</button>
+        <button class="btn-ghost" id="clearReflections" type="button">Clear</button>
+      </div>
+    </section>
+
+    <section class="card" id="quizCard" aria-labelledby="quizTitle">
+      <h2 id="quizTitle">3. Quiz</h2>
+      <div id="quizWrap"></div>
+      <div class="btns">
+        <button class="btn-primary" id="submitQuiz" type="button">Submit Quiz</button>
+        <button class="btn-ghost" id="resetQuiz" type="button">Reset</button>
+      </div>
+      <div id="quizResult" style="margin-top:12px"></div>
+    </section>
+
+    <section class="card" id="exportCard" aria-labelledby="exportTitle">
+      <h2 id="exportTitle">4. Export or send results</h2>
+      <p class="notice">Your answers and score are stored locally in your browser for this module and company. You can download them as JSON or send to a webhook such as Google Apps Script to log completions.</p>
+      <div class="btns">
+        <button class="btn-ghost" id="downloadJson" type="button">Download JSON</button>
+        <button class="btn-ghost" id="sendWebhook" type="button">Send to Webhook</button>
+        <button class="btn-ghost" id="certificateBtn" type="button">Generate Certificate</button>
+        <button class="btn-danger" id="wipeAll" type="button">Wipe Local Data</button>
+      </div>
+      <div id="webhookStatus" style="margin-top:10px"></div>
+      <canvas id="certCanvas" width="1400" height="990" style="display:none"></canvas>
+      <a id="certDownload" style="display:none">Download certificate</a>
+    </section>
+
+    <footer>
+      Built with a reusable HTML template. Configure via the <code>CONFIG</code> object at the top of the script.
+    </footer>
+  </div>
+
+  <script>
+  // ===================
+  // CONFIG – edit this
+  // ===================
+  const CONFIG = {
+    company: {
+      name: "Solomon Global",
+      logoUrl: "https://upload.wikimedia.org/wikipedia/commons/a/ac/No_image_available.svg",
+      primaryColor: "#0a5cff",
+      accentColor: "#00c2a8"
+    },
+    course: {
+      title: "Sandler Sales Training",
+      subtitle: "Reusable module template",
+      moduleId: "sandler-upfront-contracts",
+      moduleLabel: "Up-Front Contracts",
+      audioSrc: "", // paste MP3 URL here
+      passMarkPercent: 80,
+      randomizeChoices: true,
+      webhookUrl: "" // optional: paste your Google Apps Script or API endpoint
+    },
+    reflectionQuestions: [
+      "What is the purpose of the Up-Front Contract in your own words?",
+      "Write a simple Up-Front Contract you could use on your next call.",
+      "List two mistakes to avoid with Up-Front Contracts."
+    ],
+    quiz: [
+      { id: "q1", q: "What is the main goal of an Up-Front Contract?", choices: [
+        "To begin presenting early",
+        "To agree on agenda, time, and next steps",
+        "To negotiate price",
+        "To qualify budget"
+      ], correct: 1, explain: "An Up-Front Contract aligns expectations: agenda, time, roles, and clear next steps." },
+      { id: "q2", q: "When should you set the Up-Front Contract?", choices: [
+        "At the end of the call",
+        "Before scheduling the next meeting",
+        "At the start of the call",
+        "Only if the prospect asks"
+      ], correct: 2, explain: "Set it at the start so both sides know the plan and outcomes." },
+      { id: "q3", q: "Which element is not part of a strong Up-Front Contract?", choices: [
+        "Mutual agenda",
+        "Time check",
+        "Decision process",
+        "Detailed product features"
+      ], correct: 3, explain: "Features belong later. The contract frames the conversation, not the product details." },
+      { id: "q4", q: "What outcome do you want by the end of a call with a proper contract?", choices: [
+        "A yes, no, or clear next step",
+        "A demo scheduled regardless",
+        "A price negotiation",
+        "A long list of objections"
+      ], correct: 0, explain: "Sandler prefers clear outcomes: yes, no, or a scheduled next step." },
+      { id: "q5", q: "If a call over-runs the agreed time, what is best practice?", choices: [
+        "Keep going until you finish",
+        "Ask for permission to extend or reschedule",
+        "Ignore it",
+        "Send a long email later"
+      ], correct: 1, explain: "Respect the time contract. Ask to extend or reschedule." }
+    ]
+  };
+
+  // ===================
+  // Runtime – do not edit
+  // ===================
+  const $ = sel => document.querySelector(sel);
+  const $$ = sel => Array.from(document.querySelectorAll(sel));
+
+  function applyBranding(){
+    document.documentElement.style.setProperty('--brand-primary', CONFIG.company.primaryColor);
+    document.documentElement.style.setProperty('--brand-accent', CONFIG.company.accentColor);
+
+    $('#logo').src = CONFIG.company.logoUrl || '';
+    $('#logo').alt = CONFIG.company.name + ' logo';
+    $('#courseTitle').textContent = CONFIG.course.title;
+    $('#subtitle').textContent = CONFIG.course.subtitle || CONFIG.company.name;
+    $('#modulePill').textContent = CONFIG.course.moduleLabel;
+
+    const audio = $('#lessonAudio');
+    const src = $('#audioSrc');
+    if(CONFIG.course.audioSrc){ src.src = CONFIG.course.audioSrc; audio.load(); }
+  }
+
+  const LS_KEY = () => `sandler:${CONFIG.company.name}:${CONFIG.course.moduleId}`;
+
+  function saveState(state){ localStorage.setItem(LS_KEY(), JSON.stringify(state)); }
+  function loadState(){ try{ return JSON.parse(localStorage.getItem(LS_KEY())) || {}; }catch{ return {}; } }
+
+  function initAudio(){
+    const audio = $('#lessonAudio');
+    const bar = $('#audioProgress');
+    const state = loadState();
+    if(state.audioTime){ audio.currentTime = state.audioTime; }
+
+    audio.addEventListener('timeupdate', () => {
+      const pct = (audio.currentTime / (audio.duration || 1)) * 100;
+      bar.style.width = pct.toFixed(1) + '%';
+      const s = loadState(); s.audioTime = audio.currentTime; saveState(s);
+    });
+  }
+
+  function renderReflections(){
+    const wrap = $('#reflectForm');
+    wrap.innerHTML = '';
+    const state = loadState();
+    CONFIG.reflectionQuestions.forEach((text, idx) => {
+      const id = `r${idx+1}`;
+      const div = document.createElement('div');
+      div.className = 'q';
+      div.innerHTML = `<label for="${id}">${idx+1}. ${text}</label>\n<textarea id="${id}" name="${id}" placeholder="Type your answer..."></textarea>`;
+      wrap.appendChild(div);
+      if(state.reflections && state.reflections[id]){ div.querySelector('textarea').value = state.reflections[id]; }
+    });
+
+    $('#saveReflections').onclick = () => {
+      const answers = {};
+      CONFIG.reflectionQuestions.forEach((_, idx) => {
+        const id = `r${idx+1}`;
+        answers[id] = document.getElementById(id).value.trim();
+      });
+      const s = loadState(); s.reflections = answers; saveState(s);
+      flash('Reflections saved');
+    };
+
+    $('#clearReflections').onclick = () => {
+      $$('#reflectForm textarea').forEach(t => t.value = '');
+      const s = loadState(); s.reflections = {}; saveState(s);
+    };
+  }
+
+  function shuffled(arr){ return [...arr].sort(() => Math.random() - 0.5); }
+
+  function renderQuiz(){
+    const wrap = $('#quizWrap');
+    wrap.innerHTML = '';
+    const state = loadState();
+
+    CONFIG.quiz.forEach((item, idx) => {
+      const qBox = document.createElement('div');
+      qBox.className = 'mcq';
+
+      let choices = item.choices.map((c, i) => ({ idx:i, text:c }));
+      if(CONFIG.course.randomizeChoices) { choices = shuffled(choices); }
+
+      const name = `mcq_${item.id}`;
+      qBox.innerHTML = `
+        <h3>${idx+1}. ${item.q}</h3>
+        <div class="choices">${choices.map(opt => `
+          <label class="choice">
+            <input type="radio" name="${name}" value="${opt.idx}" />
+            <div>${opt.text}</div>
+          </label>`).join('')}</div>
+        <div class="explain" id="exp_${item.id}" style="display:none"></div>
+      `;
+      wrap.appendChild(qBox);
+
+      // restore selection
+      if(state.quiz && state.quiz[item.id] !== undefined){
+        const v = String(state.quiz[item.id]);
+        qBox.querySelectorAll(`input[name="${name}"]`).forEach(r => { if(r.value === v) r.checked = true; });
+      }
+
+      // persist on change
+      qBox.addEventListener('change', (e) => {
+        if(e.target && e.target.name === name){
+          const s = loadState(); s.quiz = s.quiz || {}; s.quiz[item.id] = Number(e.target.value); saveState(s);
+        }
+      });
+    });
+
+    $('#submitQuiz').onclick = gradeQuiz;
+    $('#resetQuiz').onclick = () => { const s = loadState(); s.quiz = {}; saveState(s); renderQuiz(); $('#quizResult').innerHTML = ''; };
+  }
+
+  function gradeQuiz(){
+    const state = loadState();
+    const answers = state.quiz || {};
+    let correct = 0;
+
+    CONFIG.quiz.forEach(item => {
+      const user = answers[item.id];
+      const isCorrect = user === item.correct;
+      if(isCorrect) correct++;
+      const box = document.getElementById(`exp_${item.id}`);
+      box.style.display = 'block';
+      box.innerHTML = isCorrect
+        ? `<span class="chip ok">Correct</span> ${item.explain || ''}`
+        : `<span class="chip fail">Incorrect</span> ${item.explain || ''}`;
+    });
+
+    const total = CONFIG.quiz.length;
+    const percent = Math.round((correct/total)*100);
+    const pass = percent >= CONFIG.course.passMarkPercent;
+
+    const result = {
+      correct, total, percent, pass,
+      when: new Date().toISOString()
+    };
+
+    const s = loadState(); s.result = result; saveState(s);
+
+    $('#quizResult').innerHTML = `
+      <div class="notice">
+        <div class="score">Score: ${percent}% (${correct}/${total})</div>
+        <div>${ pass ? 'Great work. You passed.' : 'Keep going. Review the audio and try again.'}</div>
+      </div>
+    `;
+  }
+
+  function flash(msg){
+    const n = document.createElement('div');
+    n.className = 'notice';
+    n.textContent = msg;
+    n.style.position = 'fixed'; n.style.bottom = '20px'; n.style.right = '20px'; n.style.boxShadow = 'var(--shadow)';
+    document.body.appendChild(n);
+    setTimeout(() => n.remove(), 1600);
+  }
+
+  function collectPayload(){
+    const s = loadState();
+    return {
+      company: CONFIG.company,
+      course: CONFIG.course,
+      reflections: s.reflections || {},
+      quizAnswers: s.quiz || {},
+      result: s.result || null,
+      userAgent: navigator.userAgent,
+      ts: new Date().toISOString()
+    };
+  }
+
+  function downloadJSON(){
+    const payload = collectPayload();
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `${CONFIG.course.moduleId}-results.json`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 500);
+  }
+
+  async function postWebhook(){
+    const endpoint = CONFIG.course.webhookUrl;
+    if(!endpoint){ flash('No webhook configured'); return; }
+    const payload = collectPayload();
+    try{
+      const res = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      const text = await res.text();
+      $('#webhookStatus').textContent = `Webhook response: ${res.status} ${text.slice(0,200)}`;
+      flash('Sent');
+    }catch(err){
+      $('#webhookStatus').textContent = 'Error sending webhook: ' + err.message;
+    }
+  }
+
+  function wipeAll(){ localStorage.removeItem(LS_KEY()); location.reload(); }
+
+  function certificate(){
+    const s = loadState();
+    if(!s.result || !s.result.pass){ flash('Pass the quiz to generate a certificate'); return; }
+    const c = document.getElementById('certCanvas');
+    const ctx = c.getContext('2d');
+
+    // background
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,c.width,c.height);
+
+    // border
+    ctx.strokeStyle = CONFIG.company.primaryColor; ctx.lineWidth = 12; ctx.strokeRect(40,40,c.width-80,c.height-80);
+
+    // title
+    ctx.fillStyle = '#111827';
+    ctx.font = 'bold 64px Inter, Arial, sans-serif';
+    ctx.fillText('Certificate of Completion', 140, 200);
+
+    ctx.font = '28px Inter, Arial, sans-serif';
+    ctx.fillStyle = '#374151';
+    ctx.fillText('This certifies that', 140, 260);
+
+    ctx.fillStyle = '#111827';
+    ctx.font = 'bold 48px Inter, Arial, sans-serif';
+    const name = 'Participant';
+    ctx.fillText(name, 140, 320);
+
+    ctx.fillStyle = '#374151';
+    ctx.font = '28px Inter, Arial, sans-serif';
+    const line = `has completed ${CONFIG.course.title} – ${CONFIG.course.moduleLabel}`;
+    ctx.fillText(line, 140, 370);
+
+    ctx.font = '24px Inter, Arial, sans-serif';
+    ctx.fillText('Company: ' + CONFIG.company.name, 140, 420);
+    ctx.fillText('Score: ' + (s.result.percent || 0) + '%', 140, 460);
+    ctx.fillText('Date: ' + (new Date().toLocaleDateString()), 140, 500);
+
+    // seal
+    ctx.fillStyle = CONFIG.company.accentColor;
+    ctx.beginPath(); ctx.arc(1100, 750, 120, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 44px Inter, Arial, sans-serif';
+    ctx.fillText('Sandler', 1030, 760);
+
+    // download link
+    const url = c.toDataURL('image/png');
+    const a = document.getElementById('certDownload');
+    a.href = url; a.download = `${CONFIG.course.moduleId}-certificate.png`;
+    a.style.display = 'inline-block';
+    a.textContent = 'Download certificate';
+  }
+
+  // Events
+  document.getElementById('downloadJson').onclick = downloadJSON;
+  document.getElementById('sendWebhook').onclick = postWebhook;
+  document.getElementById('wipeAll').onclick = wipeAll;
+  document.getElementById('certificateBtn').onclick = certificate;
+
+  // Init
+  applyBranding();
+  initAudio();
+  renderReflections();
+  renderQuiz();
+  </script>
+</body>
+</html>
